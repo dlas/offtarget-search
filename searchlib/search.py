@@ -1,14 +1,23 @@
 
-from .dataman import GenomeManager
+from .dataman import GenomeManager, MockGenomeManager
 from copy import deepcopy
+from dataclasses import dataclass
 
-print("hi")
+@dataclass
+class OffTargetMatch:
+	locus: str
+	pam: str
 
 def IsConcrete(s: str):
 	for c in s:
 		if c not in "AGCT":
 			return False
 	return True
+
+
+def test_IsConcrete():
+	assert(IsConcrete("AAAS") == False)
+	assert(IsConcrete("ACCCTG") == True)
 
 
 
@@ -41,6 +50,14 @@ def EnumerateAmbiguous(pam: list[str], split, output):
 				EnumerateAmbiguous(newpam, i, output)
 
 
+def EnumerateAmbiguousWrapper(pam: str):
+	output = []
+	EnumerateAmbiguous(list(pam), 0, output)
+	return sorted(output)
+
+def test_EnumerateAmbiguous():
+	assert(EnumerateAmbiguousWrapper("NRG") == ["AAG", "AGG", "CAG", "CGG", "GAG", "GGG", "TAG", "TGG"])
+
 def Search(G: GenomeManager, pam: str, spacer:str):
 	expanded_pams = []
 	EnumerateAmbiguous(list(pam), 0, expanded_pams)
@@ -49,14 +66,17 @@ def Search(G: GenomeManager, pam: str, spacer:str):
 		SearchExactPAM(G, p, spacer)
 
 def SearchExactPAM(G: GenomeManager, pam: str, spacer: str):
-	for idx in range(0, G.length() - (len(pam) + len(spacer))):
+	#for idx in range(0, G.length() - (len(pam) + len(spacer))):
 
+	idx = 0
 
-		matched = Match(G, idx, pam, spacer)
+	idx = G.find_after(0, pam)
+	while (idx >= 0 and (idx + len(pam) + len(spacer) < G.length())):
+		matched = Match(G, idx-len(spacer), pam, spacer)
 		if matched:
 			print(f"{idx} {pam}")
+		idx = G.find_after(idx+1, pam)
 
-	
 
 def does_alternative_match(base, alts):
 	for a in alts:
@@ -66,10 +86,8 @@ def does_alternative_match(base, alts):
 
 def Match(G: GenomeManager, start, pam, spacer):
 	seq = G.subsequence(start, len(pam) + len(spacer))
-	#print(seq)
-	#print(seq[0:2] == "NN")
 
-	if seq[-(len(pam)):] != pam:
+	if seq[-((len(pam))):] != pam:
 		return False
 
 	mismatches = 0
@@ -83,3 +101,16 @@ def Match(G: GenomeManager, start, pam, spacer):
 			return False
 
 	return True
+
+def test_Match():
+	M = MockGenomeManager()
+
+	assert(Match(M, 0, "GGG",        "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(Match(M, 0, "GGG", 	 "AAATAAAAAAAAAAAAAAAAA"))
+	assert(not Match(M, 0, "TTT", 	 "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(not Match(M, 24, "GGG", 	 "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(Match(M, 96, "TTT", 	 "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(Match(M, 144, "GGG", 	 "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(Match(M, 144, "GGG", 	 "AGGAAAAAAAAAAAAAAAAAA"))
+	assert(not Match(M, 144, "GGG",  "AAAAAAAAAAAAAAAGAAAAA"))
+

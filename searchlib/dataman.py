@@ -52,6 +52,8 @@ class GenomeManager:
 		#return self.fasta_data[contig][start:start+length]
 		return self.fasta_data[start:start+length].seq
 
+	def find_after(self, start, s):
+		return self.fasta_data.seq.find(s, start)
 	
 	def vcfalternatives(self, position):
 		if position in self.variants_for_position:
@@ -79,10 +81,15 @@ class MockGenomeManager:
 			"AGGAAAAAAAAAAAAAAAAAAGGG" #72
 			"AAAAAAAAAAAAAAAAAAAAATTT" #96
 			"TGGAAAAAAAAAAAAAAAAAAGGG" #120
-			"GGGGAAAAAAAAAAAAAAAAAGGG") # 144
+			"GGGGAAAAAAAAAAAAAAAAAGGG" #144
+			"CCCCCCCCCCCCCCCCCCCAAAAA") #168
+		print(f"-{self.seq}-")
 
 	def subsequence(self, start, length):
 		return self.seq[start:start+length]
+
+	def find_after(self, start, s):
+		return self.seq.find(s, start)
 
 	def vcfalternatives(self, position):
 		if position in self.variants_for_position:
