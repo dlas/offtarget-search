@@ -70,7 +70,8 @@ class MockGenomeManager:
 			74: [Variant("A", "", 0)],
 			144: [Variant("A", "", 0)],
 			145: [Variant("A", "", 0)],
-			146: [Variant("A", "", 0)]
+			146: [Variant("A", "", 0)],
+			215: [Variant("G", "", 0)]
 
 		}
 
@@ -82,7 +83,8 @@ class MockGenomeManager:
 			"AAAAAAAAAAAAAAAAAAAAATTT" #96
 			"TGGAAAAAAAAAAAAAAAAAAGGG" #120
 			"GGGGAAAAAAAAAAAAAAAAAGGG" #144
-			"CCCCCCCCCCCCCCCCCCCAAAAA") #168
+			"CCCCCCCCCCCCCCCCCCCAAAAA" #168
+			"AAAAAAAAAAAAAAAAAGAAAGGA") #192
 		print(f"-{self.seq}-")
 
 	def subsequence(self, start, length):

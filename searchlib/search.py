@@ -62,21 +62,27 @@ def Search(G: GenomeManager, pam: str, spacer:str):
 	expanded_pams = []
 	EnumerateAmbiguous(list(pam), 0, expanded_pams)
 
+	matches = []
+
 	for p in expanded_pams:
-		SearchExactPAM(G, p, spacer)
+		matches += SearchExactPAM(G, p, spacer)
 
 def SearchExactPAM(G: GenomeManager, pam: str, spacer: str):
 	#for idx in range(0, G.length() - (len(pam) + len(spacer))):
 
-	idx = 0
+	matches = []
 
-	idx = G.find_after(0, pam)
+	#idx = G.find_after(0, pam)
+	idx = len(spacer)
 	while (idx >= 0 and (idx + len(pam) + len(spacer) < G.length())):
 		matched = Match(G, idx-len(spacer), pam, spacer)
 		if matched:
 			print(f"{idx} {pam}")
-		idx = G.find_after(idx+1, pam)
+			#matches.append(idx, pam)
+		#idx = G.find_after(idx+1, pam)
+		idx += 1
 
+	return matches
 
 def does_alternative_match(base, alts):
 	for a in alts:
@@ -84,11 +90,24 @@ def does_alternative_match(base, alts):
 			return True
 	return False
 
+def CountMismatches(G, start, seq, test_seq, maximum):
+	mismatches = 0
+	for idx in range(0, len(test_seq)):
+		if seq[idx] != test_seq[idx]:
+			if not does_alternative_match(test_seq[idx], G.vcfalternatives(start+idx)):
+				mismatches +=1
+		if mismatches > maximum:
+			return False
+	return True
+
 def Match(G: GenomeManager, start, pam, spacer):
 	seq = G.subsequence(start, len(pam) + len(spacer))
 
-	if seq[-((len(pam))):] != pam:
+	if not CountMismatches(G, start, seq[-(len(pam)):], pam, 0):
 		return False
+
+	#if seq[-((len(pam))):] != pam:
+	#	return False
 
 	mismatches = 0
 
@@ -113,4 +132,5 @@ def test_Match():
 	assert(Match(M, 144, "GGG", 	 "AAAAAAAAAAAAAAAAAAAAA"))
 	assert(Match(M, 144, "GGG", 	 "AGGAAAAAAAAAAAAAAAAAA"))
 	assert(not Match(M, 144, "GGG",  "AAAAAAAAAAAAAAAGAAAAA"))
+	assert(Match(M, 192, "GGA",  "AAAAAAAAAAAAAAAAAAAAA"))
 
