@@ -67,6 +67,8 @@ def Search(G: GenomeManager, pam: str, spacer:str):
 	for p in expanded_pams:
 		matches += SearchExactPAM(G, p, spacer)
 
+	return matches
+
 def SearchExactPAM(G: GenomeManager, pam: str, spacer: str):
 	#for idx in range(0, G.length() - (len(pam) + len(spacer))):
 
@@ -78,7 +80,7 @@ def SearchExactPAM(G: GenomeManager, pam: str, spacer: str):
 		matched = Match(G, idx-len(spacer), pam, spacer)
 		if matched:
 			print(f"{idx} {pam}")
-			#matches.append(idx, pam)
+			matches.append(OffTargetMatch(idx, pam))
 		#idx = G.find_after(idx+1, pam)
 		idx += 1
 
@@ -132,5 +134,5 @@ def test_Match():
 	assert(Match(M, 144, "GGG", 	 "AAAAAAAAAAAAAAAAAAAAA"))
 	assert(Match(M, 144, "GGG", 	 "AGGAAAAAAAAAAAAAAAAAA"))
 	assert(not Match(M, 144, "GGG",  "AAAAAAAAAAAAAAAGAAAAA"))
-	assert(Match(M, 192, "GGA",  "AAAAAAAAAAAAAAAAAAAAA"))
+	assert(Match(M, 192, "GGG",  "AAAAAAAAAAAAAAAAAAAAA"))
 
