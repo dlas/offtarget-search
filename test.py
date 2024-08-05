@@ -23,7 +23,7 @@ def generate_report(results, spacer, pam):
 	ax.set_yticks(np.arange(len(result_keys)), result_keys)
 	ax.invert_yaxis()
 	ax.set_title(f"spacer: {spacer} PAM: {pam}") 
-	fig.savefig("x1.pdf")
+	fig.savefig("output.pdf")
 
 
 
@@ -56,9 +56,9 @@ def more_real_test():
 
 	spacer = "ACACGTGTA"
 	pam = "CTAN"
-	Search(G, pam, spacer)
+	r=Search(G, pam, spacer)
 
-
+	report(r, spacer, pam)
 
 more_real_test()
 #test_everything()

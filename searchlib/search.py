@@ -8,7 +8,8 @@ class OffTargetMatch:
 	locus: str
 	pam: str
 
-def IsConcrete(s: str):
+def IsConcrete(s: str) -> bool:
+	""" Is a string an unambiguous (ACTG) DNA sequence? """
 	for c in s:
 		if c not in "AGCT":
 			return False
@@ -22,7 +23,11 @@ def test_IsConcrete():
 
 
 def EnumerateAmbiguous(pam: list[str], split, output):
+
+	# What characters are allowed in a sequence?
 	ALLOWED = "ACTGRYSWKMBDHVN"
+
+	# What are the possible translations of ambiguous bases?
 	MAP = {"R": ["A", "G"],
 		"Y": ["C", "T"],
 		"S": ["G", "C"],
@@ -36,9 +41,11 @@ def EnumerateAmbiguous(pam: list[str], split, output):
 		"N": ["A", "C", "T", "G"]
 	}
 
+	# Is pam already concrete? then we're done. Add it to the output
 	if (IsConcrete(pam)):
 		output.append("".join(pam))
 
+	# Iterate over every 
 	for i in range(split, len(pam)):
 		c = pam[i]
 		if (c not in ALLOWED):
@@ -51,12 +58,18 @@ def EnumerateAmbiguous(pam: list[str], split, output):
 
 
 def EnumerateAmbiguousWrapper(pam: str):
+	""" Take a string with an ambiguous sequence and generate
+	an array of all possible realizations of that sequence. 
+	e.g. "AN" becomes ["AC", "AC", "AG", "AT"].
+	"""
 	output = []
 	EnumerateAmbiguous(list(pam), 0, output)
 	return sorted(output)
 
 def test_EnumerateAmbiguous():
 	assert(EnumerateAmbiguousWrapper("NRG") == ["AAG", "AGG", "CAG", "CGG", "GAG", "GGG", "TAG", "TGG"])
+	assert(EnumerateAmbiguousWrapper("ATTG") == ["ATTG"])
+
 
 def Search(G: GenomeManager, pam: str, spacer:str):
 	expanded_pams = []
@@ -105,23 +118,10 @@ def CountMismatches(G, start, seq, test_seq, maximum):
 def Match(G: GenomeManager, start, pam, spacer):
 	seq = G.subsequence(start, len(pam) + len(spacer))
 
-	if not CountMismatches(G, start, seq[-(len(pam)):], pam, 0):
+	if not CountMismatches(G, start+len(spacer), seq[-(len(pam)):], pam, 0):
 		return False
 
-	#if seq[-((len(pam))):] != pam:
-	#	return False
-
-	mismatches = 0
-
-	for idx in range(0, len(spacer)):
-		if seq[idx] != spacer[idx]:
-			if not does_alternative_match(spacer[idx], G.vcfalternatives(start+idx)):
-				mismatches+=1
-
-		if (mismatches > 1):
-			return False
-
-	return True
+	return CountMismatches(G, start, seq, spacer, 1)
 
 def test_Match():
 	M = MockGenomeManager()
