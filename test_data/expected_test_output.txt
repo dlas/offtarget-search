@@ -1,0 +1,3 @@
+locus	pam
+chr21:65	AT
+chr21:115	AT
