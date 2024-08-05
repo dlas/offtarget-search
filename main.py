@@ -20,7 +20,7 @@ def generate_report(results, spacer, pam, output):
         if r.pam in hit_counts:
             hit_counts[r.pam] += 1
         else:
-            hit_counts[r.pam] = 0
+            hit_counts[r.pam] = 1
             result_keys.append(r.pam)
 
     # Render this as a simple bar graph
@@ -67,7 +67,7 @@ def do_main():
         for r in reports:
             print(f"{args.contig}:{r.locus}\t{r.pam}")
 
-        logging.info("Formatting PDF file {args.pdf_output}")
+        logging.info(f"Formatting PDF file {args.pdf_output}")
         generate_report(reports, args.spacer, args.pam, args.pdf_output)
 
 
