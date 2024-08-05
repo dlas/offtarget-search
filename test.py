@@ -1,13 +1,19 @@
+#!/usr/bin/env python3
 
-from searchlib.search import Search, Match, EnumerateAmbiguous
+import argparse
+import logging
 
-from searchlib.dataman import GenomeManager, MockGenomeManager
 import matplotlib.pyplot as plt
 import numpy as np
 
-def generate_report(results, spacer, pam):
+from searchlib.search import Search, Match, EnumerateAmbiguous
+from searchlib.dataman import GenomeManager, MockGenomeManager
+
+def generate_report(results, spacer, pam, output):
+	""" Generate a nice PDF report of matching results """
 
 
+	# Count the results on a per PAM sequence basis.
 	hit_counts = {}
 	result_keys = []
 	for r in results:
@@ -17,48 +23,52 @@ def generate_report(results, spacer, pam):
 			hit_counts[r.pam]= 0
 			result_keys.append(r.pam)
 	
+	# Render this as a simple bar graph
 	fig, ax = plt.subplots()
-
 	ax.barh(np.arange(len(result_keys)), [hit_counts[x] for x in result_keys])
 	ax.set_yticks(np.arange(len(result_keys)), result_keys)
 	ax.invert_yaxis()
 	ax.set_title(f"spacer: {spacer} PAM: {pam}") 
-	fig.savefig("output.pdf")
+
+	# Save to a file
+	fig.savefig(output)
 
 
+def do_main():
+	logging.basicConfig(level=logging.INFO)
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--fasta_reference_path")
+	parser.add_argument("--vcf_augmentation_path")
+	parser.add_argument("--contig")
+	parser.add_argument("--pam")
+	parser.add_argument("--spacer")
+	parser.add_argument("--pdf_output")
 
-def test_everything():
-
-
-	M = MockGenomeManager()
-
-	r = Search(M, "GGG", "AAAAAAAAAAAAAAAAAAAAA")
-	generate_report(r, "GGG", "A*")
-	Search(M, "SGG", "AAAAAAAAAAAAATAAAAAA")
-
-	x = []
-	EnumerateAmbiguous(list("AYTW"), 0, x)
-	print(x)
-	G = GenomeManager("/home/dstaff/code/gene/data/tiny_chr21.fa.gz", "/home/dstaff/code/gene/data/gnomad_af01_snps_chr21.vcf.bgz", "chr21")
-
-	G.load()
-
-	Search(G, "AT", "TTGTGACTGAAGGGC")
-	Search(G, "AT", "TTGTGACTGTAGGGC")
-	Search(G, "AT", "TTGTGACTTAAGGGC")
-
-
-def more_real_test():
+	args = parser.parse_args()
 	
-	G = GenomeManager("/home/dstaff/code/gene/data/chr21.fa.gz",  "/home/dstaff/code/gene/data/gnomad_af01_snps_chr21.vcf.bgz", "chr21")
+	G = GenomeManager(args.fasta_reference_path, args.vcf_augmentation_path, args.contig)
+
+	logging.info("Loading...")
 
 	G.load()
 
-	spacer = "ACACGTGTA"
-	pam = "CTAN"
-	r=Search(G, pam, spacer)
+	logging.info(f"Searching {args.fasta_reference_path} (contig: {args.contig} augmented by {args.vcf_augmentation_path} for PAM sequence {args.pam} after spacer {args.spacer}")
 
-	report(r, spacer, pam)
+	reports = Search(G, args.pam, args.spacer)
 
-more_real_test()
-#test_everything()
+	logging.info(f"Search completed with {len(reports)} matches")
+
+	if (len(reports) == 0):
+		print("No matches found.")
+	else:
+		print("locus\tpam")
+		for r in reports:
+			print(f"{args.contig}:{r.locus}\t{r.pam}")
+			
+
+		logging.info("Formatting PDF file {args.pdf_output}")
+		generate_report(reports, args.spacer, args.pam, args.pdf_output)
+
+
+if __name__ == "__main__":
+	do_main()

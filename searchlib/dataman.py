@@ -1,9 +1,10 @@
 
-from Bio import SeqIO
 import gzip
-import vcfpy
+import logging
 from dataclasses import dataclass
 
+import vcfpy
+from Bio import SeqIO
 @dataclass
 
 class Variant:
@@ -12,7 +13,10 @@ class Variant:
 	freq:float
 
 class GenomeManager:
-	
+	""" This is a simple class that holds the concept of an augmented reference genome. 
+	It can be loaded with a genome frmo a fasta file and a set of variants from a vcf file
+	These are loaded into memory and we offer convenient functions to retrieve a subsequence
+	or to retrive the variants at a specific locale"""	
 	def __init__(self, fasta_path, vcf_path, contig):
 		self.fasta_path = fasta_path
 		self.vcf_path = vcf_path
@@ -21,20 +25,26 @@ class GenomeManager:
 		self.fasta_data = None
 			
 	def load(self):
+		""" Actually load the data"""
 		self.loadfa()
 		self.loadvcf()
 
 	def loadfa(self):
+		""" Load the fasta file."""
+
+		# Use the fasta parser to load the whole file into memory and stash the contig that
+		# we care about.
 		with gzip.open(self.fasta_path, "rt") as handle:
 			all_fasta_data = SeqIO.to_dict(SeqIO.parse(handle, "fasta"))
 			self.fasta_data = all_fasta_data[self.contig]
 		
-		print("fa loaded")
 	def loadvcf(self):
+		""" Load the VCF file"""
 
+		#  Open the file
 		reader = vcfpy.Reader.from_path(self.vcf_path)
 		
-
+		# Copy the contents of the VCF file into a map of Variant objects
 		for record in reader:
 			if record.is_snv():
 				pos = record.POS
@@ -45,11 +55,7 @@ class GenomeManager:
 					else:
 						self.variants_for_position[pos]=[v_record]
 	
-		print("vcf loaded")
-
-
 	def subsequence(self, start, length):
-		#return self.fasta_data[contig][start:start+length]
 		return self.fasta_data[start:start+length].seq
 
 	def find_after(self, start, s):
@@ -65,6 +71,9 @@ class GenomeManager:
 		return len(self.fasta_data)
 
 class MockGenomeManager:
+	""" This is a mock GenomeManager class with a small amount of data that we can use
+	for unit tests.
+	"""
 	def __init__(self):
 		self.variants_for_position = {
 			74: [Variant("A", "", 0)],
