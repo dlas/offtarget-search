@@ -1,0 +1,30 @@
+(v1) [0 dstaff@nitrogen ~/code/gene/crispr-offtarget]$ ./main.py --fasta_reference_path=../data/chr21.fa.gz --vcf_augmentation_path=../data/gnomad_af01_snps_chr21.vcf.bgz --contig=chr21 --pam=CTAN --spacer=ACACGTGTA --pdf_output=op1.pdf
+INFO:root:Loading...
+INFO:root:Searching ../data/chr21.fa.gz (contig: chr21 augmented by ../data/gnomad_af01_snps_chr21.vcf.bgz for PAM sequence CTAN after spacer ACACGTGTA
+INFO:root:found: 6507497 CTAA
+INFO:root:found: 18827212 CTAA
+INFO:root:found: 31995211 CTAA
+INFO:root:found: 43115817 CTAA
+INFO:root:found: 44644427 CTAA
+INFO:root:found: 45644476 CTAA
+INFO:root:found: 17569897 CTAC
+INFO:root:found: 39231213 CTAC
+INFO:root:found: 44874766 CTAC
+INFO:root:found: 20551906 CTAT
+INFO:root:found: 31454397 CTAT
+INFO:root:found: 37653366 CTAG
+INFO:root:Search completed with 12 matches
+locus	pam
+chr21:6507497	CTAA
+chr21:18827212	CTAA
+chr21:31995211	CTAA
+chr21:43115817	CTAA
+chr21:44644427	CTAA
+chr21:45644476	CTAA
+chr21:17569897	CTAC
+chr21:39231213	CTAC
+chr21:44874766	CTAC
+chr21:20551906	CTAT
+chr21:31454397	CTAT
+chr21:37653366	CTAG
+INFO:root:Formatting PDF file op1.pdf
